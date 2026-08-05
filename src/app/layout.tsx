@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TravelEdge — Corporate Travel Operating System",
+  title: "Travelio — Corporate Travel Operating System",
   description: "The command center for corporate travel agencies",
 };
 

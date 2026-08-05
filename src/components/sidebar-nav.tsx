@@ -34,7 +34,7 @@ export function SidebarNav() {
           <Plane className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-sidebar-foreground leading-tight">TravelEdge</p>
+          <p className="text-sm font-semibold text-sidebar-foreground leading-tight">Travelio</p>
           <p className="text-[10px] text-sidebar-foreground/50 leading-tight">Operations Platform</p>
         </div>
       </div>

@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { Plane, Eye, EyeOff, ArrowRight } from "lucide-react";
 
 const DEMO_CREDENTIALS = [
-  { email: "priya@traveledge.in", password: "demo1234", role: "Owner", name: "Priya Sharma" },
-  { email: "arjun@traveledge.in", password: "demo1234", role: "Consultant", name: "Arjun Mehta" },
+  { email: "priya@travelio.in", password: "demo1234", role: "Owner", name: "Priya Sharma" },
+  { email: "arjun@travelio.in", password: "demo1234", role: "Consultant", name: "Arjun Mehta" },
 ];
 
 export default function LoginPage() {
@@ -51,7 +51,7 @@ export default function LoginPage() {
           <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
             <Plane className="w-5 h-5 text-white" />
           </div>
-          <span className="text-lg font-semibold text-white">TravelEdge</span>
+          <span className="text-lg font-semibold text-white">Travelio</span>
         </div>
 
         <div>
@@ -79,7 +79,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-white/30 text-sm">
-          &copy; 2026 TravelEdge. Built for modern travel agencies.
+          &copy; 2026 Travelio. Built for modern travel agencies.
         </p>
       </div>
 
@@ -91,7 +91,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Plane className="w-4 h-4 text-white" />
             </div>
-            <span className="text-base font-semibold">TravelEdge</span>
+            <span className="text-base font-semibold">Travelio</span>
           </div>
 
           <h2 className="text-2xl font-semibold text-foreground mb-1">Sign in</h2>

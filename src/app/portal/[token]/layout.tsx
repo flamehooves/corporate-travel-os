@@ -17,7 +17,7 @@ export default function PortalLayout({
               <Plane className="w-3.5 h-3.5 text-white" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-foreground">TravelEdge</span>
+              <span className="text-sm font-semibold text-foreground">Travelio</span>
               <span className="text-xs text-muted-foreground ml-1.5">Client Portal</span>
             </div>
           </div>

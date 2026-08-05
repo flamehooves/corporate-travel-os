@@ -1,4 +1,4 @@
--- TravelEdge Corporate Travel OS — Database Schema
+-- Travelio Corporate Travel OS — Database Schema
 -- Run this in your Supabase SQL Editor
 
 -- Enable UUID extension
@@ -169,12 +169,12 @@ create table if not exists suppliers (
 
 -- Sample data for demo
 insert into agencies (id, name, email, phone) values
-  ('ag1-0000-0000-0000-000000000001', 'TravelEdge', 'hello@traveledge.in', '+91 98765 00000');
+  ('ag1-0000-0000-0000-000000000001', 'Travelio', 'hello@travelio.in', '+91 98765 00000');
 
 insert into agency_users (id, agency_id, name, email, role) values
-  ('u1-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Priya Sharma', 'priya@traveledge.in', 'owner'),
-  ('u2-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Arjun Mehta', 'arjun@traveledge.in', 'consultant'),
-  ('u3-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Sneha Kapoor', 'sneha@traveledge.in', 'consultant');
+  ('u1-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Priya Sharma', 'priya@travelio.in', 'owner'),
+  ('u2-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Arjun Mehta', 'arjun@travelio.in', 'consultant'),
+  ('u3-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Sneha Kapoor', 'sneha@travelio.in', 'consultant');
 
 insert into clients (id, agency_id, company_name, contact_name, contact_email, credit_limit, credit_days, portal_token) values
   ('c1-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Infosys Limited', 'Kavitha Reddy', 'kavitha@infosys.com', 2000000, 30, 'infosys-a8x2k'),

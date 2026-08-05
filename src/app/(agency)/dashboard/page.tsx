@@ -78,7 +78,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Command Center</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Tuesday, 5 August 2026 · TravelEdge Operations
+            Tuesday, 5 August 2026 · Travelio Operations
           </p>
         </div>
         <div className="flex items-center gap-2">
