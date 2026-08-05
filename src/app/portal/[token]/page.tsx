@@ -12,7 +12,7 @@ import {
   Plane,
 } from "lucide-react";
 import { mockClients, mockRequests } from "@/lib/mock-data";
-import { RequestStatusBadge, TripTypeBadge } from "@/components/status-badge";
+import { RequestStatusBadge, TripTypesBadge } from "@/components/status-badge";
 import { formatDate, timeAgo } from "@/lib/utils";
 
 export default function PortalHomePage({
@@ -152,7 +152,7 @@ export default function PortalHomePage({
                       <Calendar className="w-3.5 h-3.5" />
                       {formatDate(req.departure_date)}
                     </div>
-                    <TripTypeBadge type={req.trip_type} />
+                    <TripTypesBadge types={req.trip_types} />
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import { mockRequests } from "@/lib/mock-data";
-import { RequestStatusBadge, TripTypeBadge } from "@/components/status-badge";
+import { RequestStatusBadge, TripTypesBadge } from "@/components/status-badge";
 import { formatDate, formatCurrency, timeAgo } from "@/lib/utils";
 import type { RequestStatus } from "@/lib/types";
 
@@ -116,7 +116,7 @@ export default function RequestsPage() {
                   <p className="text-xs text-muted-foreground">{formatDate(req.departure_date)}</p>
                 </td>
                 <td className="px-5 py-4 hidden md:table-cell">
-                  <TripTypeBadge type={req.trip_type} />
+                  <TripTypesBadge types={req.trip_types} />
                 </td>
                 <td className="px-5 py-4 hidden xl:table-cell">
                   {req.budget ? (

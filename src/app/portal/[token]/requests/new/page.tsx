@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { mockClients } from "@/lib/mock-data";
+import type { TripType } from "@/lib/types";
+
+const TRIP_TYPES: { value: TripType; label: string; emoji: string; description: string }[] = [
+  { value: "flight", label: "Flight", emoji: "✈", description: "Domestic or international air travel" },
+  { value: "hotel", label: "Hotel", emoji: "🏨", description: "Accommodation at destination" },
+  { value: "train", label: "Train", emoji: "🚄", description: "Railway bookings via IRCTC" },
+  { value: "visa", label: "Visa", emoji: "📋", description: "Visa assistance & documentation" },
+];
 
 export default function NewRequestPage({
   params,
@@ -12,7 +20,6 @@ export default function NewRequestPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = use(params);
-  const router = useRouter();
   const client = mockClients.find((c) => c.portal_token === token);
 
   const [submitted, setSubmitted] = useState(false);
@@ -20,13 +27,15 @@ export default function NewRequestPage({
   const [form, setForm] = useState({
     traveler_name: "",
     traveler_email: "",
-    trip_type: "flight",
+    trip_types: ["flight"] as TripType[],
     origin: "",
     destination: "",
     departure_date: "",
     return_date: "",
     purpose: "",
     preferred_class: "Economy",
+    hotel_nights: "",
+    hotel_preference: "",
     budget: "",
     special_instructions: "",
   });
@@ -37,6 +46,18 @@ export default function NewRequestPage({
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
+  function toggleTripType(type: TripType) {
+    setForm((prev) => {
+      const already = prev.trip_types.includes(type);
+      if (already) {
+        // don't deselect if it's the last one
+        if (prev.trip_types.length === 1) return prev;
+        return { ...prev, trip_types: prev.trip_types.filter((t) => t !== type) };
+      }
+      return { ...prev, trip_types: [...prev.trip_types, type] };
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -44,6 +65,9 @@ export default function NewRequestPage({
     setSubmitted(true);
     setLoading(false);
   }
+
+  const hasFlightOrTrain = form.trip_types.some((t) => t === "flight" || t === "train");
+  const hasHotel = form.trip_types.includes("hotel");
 
   if (!client) {
     return <div className="text-center py-20"><p className="text-muted-foreground">Invalid portal link.</p></div>;
@@ -115,29 +139,48 @@ export default function NewRequestPage({
           </div>
         </div>
 
-        {/* Trip */}
+        {/* What do you need? — multi-select segments */}
         <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-foreground mb-4">Trip Details</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-1">What do you need?</h2>
+          <p className="text-xs text-muted-foreground mb-4">Select all that apply — you can request multiple services in one go.</p>
+          <div className="grid grid-cols-2 gap-3">
+            {TRIP_TYPES.map((type) => {
+              const selected = form.trip_types.includes(type.value);
+              return (
+                <button
+                  key={type.value}
+                  type="button"
+                  onClick={() => toggleTripType(type.value)}
+                  className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all ${
+                    selected
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                      : "border-border hover:border-border/80 hover:bg-secondary/50"
+                  }`}
+                >
+                  <span className="text-xl flex-shrink-0 mt-0.5">{type.emoji}</span>
+                  <div>
+                    <p className={`text-sm font-medium ${selected ? "text-primary" : "text-foreground"}`}>
+                      {type.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{type.description}</p>
+                  </div>
+                  {selected && (
+                    <div className="ml-auto flex-shrink-0 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                      <svg viewBox="0 0 10 10" className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M2 5l2.5 2.5L8 3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Trip Route & Dates */}
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-foreground mb-4">Route & Dates</h2>
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label className="block text-sm text-muted-foreground mb-1.5">Travel Type *</label>
-              <div className="flex gap-2 flex-wrap">
-                {["flight", "train", "hotel", "combined", "visa"].map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setForm((p) => ({ ...p, trip_type: type }))}
-                    className={`px-3.5 py-1.5 rounded-lg text-sm border transition-all capitalize ${
-                      form.trip_type === type
-                        ? "bg-primary text-white border-primary"
-                        : "border-border text-muted-foreground hover:text-foreground hover:border-border/80"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
             <div>
               <label className="block text-sm text-muted-foreground mb-1.5">From *</label>
               <input
@@ -161,7 +204,9 @@ export default function NewRequestPage({
               />
             </div>
             <div>
-              <label className="block text-sm text-muted-foreground mb-1.5">Departure Date *</label>
+              <label className="block text-sm text-muted-foreground mb-1.5">
+                {hasHotel && !hasFlightOrTrain ? "Check-in Date *" : "Departure Date *"}
+              </label>
               <input
                 name="departure_date"
                 type="date"
@@ -184,9 +229,67 @@ export default function NewRequestPage({
           </div>
         </div>
 
-        {/* Preferences */}
+        {/* Segment-specific fields */}
+        {(hasFlightOrTrain || hasHotel) && (
+          <div className="bg-card border border-border rounded-xl p-5 space-y-5">
+            <h2 className="text-sm font-semibold text-foreground">Segment Preferences</h2>
+
+            {hasFlightOrTrain && (
+              <div>
+                <label className="block text-sm text-muted-foreground mb-2">
+                  {form.trip_types.includes("flight") ? "Flight Cabin Class" : "Train Class"}
+                </label>
+                <div className="flex gap-2 flex-wrap">
+                  {["Economy", "Premium Economy", "Business", "First"].map((cls) => (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => setForm((p) => ({ ...p, preferred_class: cls }))}
+                      className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                        form.preferred_class === cls
+                          ? "bg-primary text-white border-primary"
+                          : "border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {cls}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {hasHotel && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5">Number of Nights</label>
+                  <input
+                    name="hotel_nights"
+                    type="number"
+                    min="1"
+                    value={form.hotel_nights}
+                    onChange={handleChange}
+                    placeholder="e.g. 3"
+                    className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5">Hotel Preference</label>
+                  <input
+                    name="hotel_preference"
+                    value={form.hotel_preference}
+                    onChange={handleChange}
+                    placeholder="e.g. Near city centre, 4-star+"
+                    className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Preferences & Budget */}
         <div className="bg-card border border-border rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-foreground mb-4">Preferences & Budget</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-4">Purpose & Budget</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-muted-foreground mb-1.5">Travel Purpose *</label>
@@ -200,34 +303,15 @@ export default function NewRequestPage({
               />
             </div>
             <div>
-              <label className="block text-sm text-muted-foreground mb-1.5">Budget (₹)</label>
+              <label className="block text-sm text-muted-foreground mb-1.5">Total Budget (₹)</label>
               <input
                 name="budget"
                 type="number"
                 value={form.budget}
                 onChange={handleChange}
-                placeholder="Optional budget limit"
+                placeholder="Optional"
                 className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
               />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-sm text-muted-foreground mb-1.5">Cabin / Class</label>
-              <div className="flex gap-2">
-                {["Economy", "Premium Economy", "Business", "First"].map((cls) => (
-                  <button
-                    key={cls}
-                    type="button"
-                    onClick={() => setForm((p) => ({ ...p, preferred_class: cls }))}
-                    className={`px-3 py-1.5 rounded-lg text-sm border transition-all ${
-                      form.preferred_class === cls
-                        ? "bg-primary text-white border-primary"
-                        : "border-border text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {cls}
-                  </button>
-                ))}
-              </div>
             </div>
             <div className="col-span-2">
               <label className="block text-sm text-muted-foreground mb-1.5">Special Instructions</label>
@@ -235,7 +319,7 @@ export default function NewRequestPage({
                 name="special_instructions"
                 value={form.special_instructions}
                 onChange={handleChange}
-                placeholder="Any special requests, dietary needs, visa requirements, seat preferences..."
+                placeholder="Seat preferences, dietary needs, visa requirements, any other requests..."
                 rows={3}
                 className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
               />

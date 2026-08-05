@@ -14,7 +14,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { MetricCard } from "@/components/metric-card";
-import { RequestStatusBadge, TripTypeBadge } from "@/components/status-badge";
+import { RequestStatusBadge, TripTypesBadge } from "@/components/status-badge";
 import { mockRequests, mockInvoices, dashboardMetrics } from "@/lib/mock-data";
 import { formatCurrency, formatDate, formatDateTime, timeAgo } from "@/lib/utils";
 
@@ -251,7 +251,7 @@ export default function DashboardPage() {
                     <p className="text-sm font-medium text-foreground">{req.traveler_name}</p>
                     <p className="text-xs text-muted-foreground">{req.origin} → {req.destination} · {req.client?.company_name}</p>
                   </div>
-                  <TripTypeBadge type={req.trip_type} />
+                  <TripTypesBadge types={req.trip_types} />
                   <RequestStatusBadge status={req.status} />
                 </div>
               ))}

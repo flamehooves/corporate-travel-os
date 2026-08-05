@@ -44,17 +44,55 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex" style={{
+      background: "linear-gradient(135deg, #e0f2fe 0%, #bae6fd 25%, #f0f9ff 50%, #fffbf0 75%, #fef3c7 100%)",
+    }}>
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-sidebar flex-col justify-between p-12">
-        <div className="flex items-center gap-3">
+      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 relative overflow-hidden"
+        style={{ background: "linear-gradient(155deg, oklch(0.17 0.025 255) 0%, oklch(0.22 0.04 250) 60%, oklch(0.26 0.06 260) 100%)" }}
+      >
+        {/* Decorative sky elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Horizon glow */}
+          <div className="absolute bottom-0 left-0 right-0 h-40"
+            style={{ background: "linear-gradient(to top, oklch(0.45 0.12 260 / 0.3), transparent)" }}
+          />
+          {/* Stars */}
+          {[
+            { top: "12%", left: "18%", size: 2 },
+            { top: "8%", left: "60%", size: 1.5 },
+            { top: "22%", left: "80%", size: 2 },
+            { top: "35%", left: "10%", size: 1.5 },
+            { top: "30%", left: "45%", size: 1 },
+            { top: "18%", left: "35%", size: 1 },
+            { top: "50%", left: "88%", size: 1.5 },
+            { top: "42%", left: "25%", size: 1 },
+          ].map((star, i) => (
+            <div key={i} className="absolute rounded-full bg-white/60"
+              style={{ top: star.top, left: star.left, width: star.size, height: star.size }}
+            />
+          ))}
+          {/* Plane silhouette */}
+          <div className="absolute top-[38%] right-[12%] opacity-20">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="white">
+              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
+            </svg>
+          </div>
+          {/* Abstract travel route lines */}
+          <svg className="absolute bottom-12 left-0 right-0 w-full opacity-10" height="80" viewBox="0 0 400 80" preserveAspectRatio="none">
+            <path d="M0,60 Q100,20 200,50 Q300,80 400,30" stroke="white" strokeWidth="1.5" fill="none" strokeDasharray="4 4" />
+            <path d="M0,40 Q80,70 160,35 Q280,10 400,55" stroke="white" strokeWidth="1" fill="none" strokeDasharray="3 6" />
+          </svg>
+        </div>
+
+        <div className="relative flex items-center gap-3">
           <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
             <Plane className="w-5 h-5 text-white" />
           </div>
           <span className="text-lg font-semibold text-white">Travelio</span>
         </div>
 
-        <div>
+        <div className="relative">
           <h1 className="text-3xl font-semibold text-white leading-tight mb-4">
             Your corporate travel business,{" "}
             <span className="text-primary">fully in control.</span>
@@ -78,14 +116,14 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-white/30 text-sm">
+        <p className="relative text-white/30 text-sm">
           &copy; 2026 Travelio. Built for modern travel agencies.
         </p>
       </div>
 
-      {/* Right panel */}
+      {/* Right panel — frosted over the gradient bg */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm bg-white/80 backdrop-blur-md rounded-2xl shadow-xl shadow-slate-200/60 border border-white/60 p-8">
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -110,7 +148,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@youragency.com"
                 required
-                className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                className="w-full px-3.5 py-2.5 bg-white/90 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
               />
             </div>
 
@@ -125,7 +163,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full px-3.5 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all pr-10"
+                  className="w-full px-3.5 py-2.5 bg-white/90 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all pr-10"
                 />
                 <button
                   type="button"
@@ -164,7 +202,7 @@ export default function LoginPage() {
           </form>
 
           {/* Demo credentials */}
-          <div className="mt-8 pt-6 border-t border-border">
+          <div className="mt-8 pt-6 border-t border-border/60">
             <p className="text-xs text-muted-foreground mb-3 font-medium uppercase tracking-wide">
               Demo accounts
             </p>
@@ -173,7 +211,7 @@ export default function LoginPage() {
                 <button
                   key={cred.email}
                   onClick={() => fillDemo(cred)}
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 border border-border rounded-lg hover:bg-secondary/60 transition-colors text-left"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 border border-border/60 rounded-lg hover:bg-white/80 transition-colors text-left"
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">{cred.name}</p>

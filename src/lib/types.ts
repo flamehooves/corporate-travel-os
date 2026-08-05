@@ -11,7 +11,6 @@ export type TripType =
   | "flight"
   | "train"
   | "hotel"
-  | "combined"
   | "visa"
   | "other";
 
@@ -57,14 +56,18 @@ export interface TravelRequest {
   status: RequestStatus;
   traveler_name: string;
   traveler_email: string;
-  trip_type: TripType;
+  // Multiple segments — a request can include flight + hotel + train etc.
+  trip_types: TripType[];
   origin: string;
   destination: string;
   departure_date: string;
   return_date?: string;
   purpose: string;
   budget?: number;
+  // Segment-specific preferences
   preferred_class?: string;
+  hotel_nights?: number;
+  hotel_preference?: string;
   special_instructions?: string;
   assigned_to?: string;
   assignee?: AgencyUser;
@@ -79,7 +82,7 @@ export interface RequestOption {
   id: string;
   request_id: string;
   option_number: number;
-  type: TripType;
+  segment_type: TripType;   // which segment this option covers
   provider: string;
   supplier_system: string;
   description: string;

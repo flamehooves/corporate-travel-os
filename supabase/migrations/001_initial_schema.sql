@@ -49,7 +49,7 @@ create table if not exists travel_requests (
   traveler_email text,
   traveler_phone text,
   employee_id text,
-  trip_type text check (trip_type in ('flight', 'train', 'hotel', 'combined', 'visa', 'other')) default 'flight',
+  trip_types text[] default '{"flight"}',
   origin text,
   destination text,
   departure_date date,
@@ -57,6 +57,8 @@ create table if not exists travel_requests (
   purpose text,
   budget numeric(12,2),
   preferred_class text,
+  hotel_nights integer,
+  hotel_preference text,
   special_instructions text,
   assigned_to uuid references agency_users(id) on delete set null,
   submitted_at timestamptz default now(),
@@ -84,12 +86,12 @@ create trigger set_request_number
   when (new.request_number is null)
   execute function generate_request_number();
 
--- Request options (consultant recommendations)
+-- Request options (consultant recommendations) — one per segment
 create table if not exists request_options (
   id uuid primary key default gen_random_uuid(),
   request_id uuid references travel_requests(id) on delete cascade,
   option_number integer,
-  type text,
+  segment_type text,               -- 'flight' | 'hotel' | 'train' | 'visa'
   provider text,
   supplier_system text,
   description text,
@@ -167,16 +169,18 @@ create table if not exists suppliers (
   created_at timestamptz default now()
 );
 
--- Sample data for demo
+-- ─── Seed data ──────────────────────────────────────────────────────────────
+-- Using valid UUIDs (hex chars only: 0-9, a-f)
+
 insert into agencies (id, name, email, phone) values
-  ('ag1-0000-0000-0000-000000000001', 'Travelio', 'hello@travelio.in', '+91 98765 00000');
+  ('aaaaaaaa-0000-0000-0000-000000000001', 'Travelio', 'hello@travelio.in', '+91 98765 00000');
 
 insert into agency_users (id, agency_id, name, email, role) values
-  ('u1-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Priya Sharma', 'priya@travelio.in', 'owner'),
-  ('u2-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Arjun Mehta', 'arjun@travelio.in', 'consultant'),
-  ('u3-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Sneha Kapoor', 'sneha@travelio.in', 'consultant');
+  ('bbbbbbbb-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000001', 'Priya Sharma',  'priya@travelio.in',  'owner'),
+  ('bbbbbbbb-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000001', 'Arjun Mehta',   'arjun@travelio.in',  'consultant'),
+  ('bbbbbbbb-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000001', 'Sneha Kapoor',  'sneha@travelio.in',  'consultant');
 
 insert into clients (id, agency_id, company_name, contact_name, contact_email, credit_limit, credit_days, portal_token) values
-  ('c1-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Infosys Limited', 'Kavitha Reddy', 'kavitha@infosys.com', 2000000, 30, 'infosys-a8x2k'),
-  ('c2-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'Wipro Technologies', 'Sanjay Desai', 'sanjay@wipro.com', 1500000, 45, 'wipro-b7y3l'),
-  ('c3-00000-0000-0000-000000000001', 'ag1-0000-0000-0000-000000000001', 'TCS', 'Meena Iyer', 'meena@tcs.com', 3000000, 30, 'tcs-c4z1m');
+  ('cccccccc-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000001', 'Infosys Limited',     'Kavitha Reddy', 'kavitha@infosys.com', 2000000, 30, 'infosys-a8x2k'),
+  ('cccccccc-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000001', 'Wipro Technologies',  'Sanjay Desai',  'sanjay@wipro.com',    1500000, 45, 'wipro-b7y3l'),
+  ('cccccccc-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000001', 'TCS',                 'Meena Iyer',    'meena@tcs.com',       3000000, 30, 'tcs-c4z1m');

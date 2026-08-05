@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { RequestStatus, InvoiceStatus } from "@/lib/types";
+import type { RequestStatus, InvoiceStatus, TripType } from "@/lib/types";
 
 const requestStatusConfig: Record<RequestStatus, { label: string; className: string }> = {
   pending: { label: "Pending", className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900" },
@@ -19,6 +19,14 @@ const invoiceStatusConfig: Record<InvoiceStatus, { label: string; className: str
   partial: { label: "Partial", className: "bg-amber-50 text-amber-700 border-amber-200" },
   paid: { label: "Paid", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   overdue: { label: "Overdue", className: "bg-red-50 text-red-700 border-red-200" },
+};
+
+const tripTypeIcons: Record<string, string> = {
+  flight: "✈",
+  train: "🚄",
+  hotel: "🏨",
+  visa: "📋",
+  other: "•",
 };
 
 interface RequestStatusBadgeProps {
@@ -58,18 +66,24 @@ export function InvoiceStatusBadge({ status, className }: InvoiceStatusBadgeProp
 }
 
 export function TripTypeBadge({ type }: { type: string }) {
-  const icons: Record<string, string> = {
-    flight: "✈",
-    train: "🚄",
-    hotel: "🏨",
-    combined: "🗺",
-    visa: "📋",
-    other: "•",
-  };
   return (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-      <span>{icons[type] || "•"}</span>
+      <span>{tripTypeIcons[type] || "•"}</span>
       <span className="capitalize">{type}</span>
+    </span>
+  );
+}
+
+export function TripTypesBadge({ types, className }: { types: TripType[]; className?: string }) {
+  if (!types || types.length === 0) return null;
+  return (
+    <span className={cn("inline-flex items-center gap-2 flex-wrap", className)}>
+      {types.map((type) => (
+        <span key={type} className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+          <span>{tripTypeIcons[type] || "•"}</span>
+          <span className="capitalize">{type}</span>
+        </span>
+      ))}
     </span>
   );
 }

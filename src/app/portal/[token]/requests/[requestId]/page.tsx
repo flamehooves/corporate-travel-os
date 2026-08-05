@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Star,
   Check,
-  X,
   Send,
   CheckCircle2,
   MapPin,
@@ -15,9 +14,17 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { mockRequests, mockClients } from "@/lib/mock-data";
-import { RequestStatusBadge } from "@/components/status-badge";
+import { RequestStatusBadge, TripTypesBadge } from "@/components/status-badge";
 import { formatDate, formatCurrencyFull, timeAgo } from "@/lib/utils";
-import type { RequestOption } from "@/lib/types";
+import type { RequestOption, TripType } from "@/lib/types";
+
+const SEGMENT_LABELS: Record<string, { label: string; emoji: string }> = {
+  flight: { label: "Flight Options", emoji: "✈" },
+  hotel: { label: "Hotel Options", emoji: "🏨" },
+  train: { label: "Train Options", emoji: "🚄" },
+  visa: { label: "Visa Services", emoji: "📋" },
+  other: { label: "Other Services", emoji: "•" },
+};
 
 export default function PortalRequestPage({
   params,
@@ -29,7 +36,8 @@ export default function PortalRequestPage({
   const request = mockRequests.find((r) => r.id === requestId);
   const [message, setMessage] = useState("");
   const [expandedOption, setExpandedOption] = useState<string | null>("opt1");
-  const [approvedOption, setApprovedOption] = useState<string | null>(null);
+  // approvedOptions maps segment_type → option_id
+  const [approvedOptions, setApprovedOptions] = useState<Record<string, string>>({});
 
   if (!client || !request) {
     return (
@@ -44,6 +52,23 @@ export default function PortalRequestPage({
 
   const messages = request.messages || [];
   const options = request.options || [];
+
+  // Group options by segment_type in the order of trip_types
+  const segmentOrder = request.trip_types;
+  const grouped = options.reduce<Record<string, RequestOption[]>>((acc, opt) => {
+    const seg = opt.segment_type;
+    if (!acc[seg]) acc[seg] = [];
+    acc[seg].push(opt);
+    return acc;
+  }, {});
+  const orderedSegments = [
+    ...segmentOrder.filter((s) => grouped[s]),
+    ...Object.keys(grouped).filter((s) => !segmentOrder.includes(s as TripType)),
+  ];
+
+  const canApprove = request.status === "options_shared";
+  const allSegmentsApproved = orderedSegments.length > 0 &&
+    orderedSegments.every((seg) => approvedOptions[seg]);
 
   return (
     <div>
@@ -81,11 +106,12 @@ export default function PortalRequestPage({
             {formatDate(request.departure_date)}
             {request.return_date && ` – ${formatDate(request.return_date)}`}
           </div>
+          <TripTypesBadge types={request.trip_types} />
           <div className="text-sm text-muted-foreground">{request.purpose}</div>
         </div>
       </div>
 
-      {/* Options to review */}
+      {/* Options to review — grouped by segment */}
       {options.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
@@ -97,38 +123,61 @@ export default function PortalRequestPage({
             </p>
           </div>
 
-          {request.status === "options_shared" && !approvedOption && (
-            <div className="bg-primary/8 border border-primary/20 rounded-xl p-3 mb-3 flex items-center gap-2">
+          {canApprove && !allSegmentsApproved && (
+            <div className="bg-primary/8 border border-primary/20 rounded-xl p-3 mb-4 flex items-center gap-2">
               <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0 animate-pulse" />
               <p className="text-xs text-foreground">
-                Please review the options below and approve your preferred choice to proceed.
+                Review each section below and select your preferred option. Approve one choice per segment to proceed.
               </p>
             </div>
           )}
 
-          {approvedOption && (
-            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-xl p-3 mb-3 flex items-center gap-2">
+          {allSegmentsApproved && (
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 rounded-xl p-3 mb-4 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
               <p className="text-xs text-emerald-800 dark:text-emerald-300 font-medium">
-                You&apos;ve approved an option. Your consultant will confirm the booking shortly.
+                All selections approved! Your consultant will confirm the bookings shortly.
               </p>
             </div>
           )}
 
-          <div className="space-y-3">
-            {options.map((opt) => (
-              <ClientOptionCard
-                key={opt.id}
-                option={opt}
-                expanded={expandedOption === opt.id}
-                onToggle={() =>
-                  setExpandedOption(expandedOption === opt.id ? null : opt.id)
-                }
-                approved={approvedOption === opt.id}
-                onApprove={() => setApprovedOption(opt.id)}
-                canApprove={request.status === "options_shared" && !approvedOption}
-              />
-            ))}
+          <div className="space-y-6">
+            {orderedSegments.map((seg) => {
+              const segOpts = grouped[seg] || [];
+              const segInfo = SEGMENT_LABELS[seg] || { label: seg, emoji: "•" };
+              const segApprovedId = approvedOptions[seg];
+              return (
+                <div key={seg}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-base">{segInfo.emoji}</span>
+                    <h3 className="text-sm font-semibold text-foreground">{segInfo.label}</h3>
+                    {segApprovedId && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-900">
+                        <Check className="w-2.5 h-2.5" />
+                        Selected
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {segOpts.map((opt) => (
+                      <ClientOptionCard
+                        key={opt.id}
+                        option={opt}
+                        expanded={expandedOption === opt.id}
+                        onToggle={() =>
+                          setExpandedOption(expandedOption === opt.id ? null : opt.id)
+                        }
+                        approved={segApprovedId === opt.id}
+                        onApprove={() =>
+                          setApprovedOptions((prev) => ({ ...prev, [seg]: opt.id }))
+                        }
+                        canApprove={canApprove && !segApprovedId}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -283,8 +332,14 @@ function ClientOptionCard({
                 className="flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-600/90 transition-colors"
               >
                 <Check className="w-4 h-4" />
-                Approve This Option
+                Select This Option
               </button>
+            )}
+            {approved && (
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="font-medium">Your selection</span>
+              </div>
             )}
             <button className="px-3 py-2 border border-border rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors">
               Ask a Question

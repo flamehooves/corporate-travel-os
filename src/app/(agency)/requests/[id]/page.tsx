@@ -14,14 +14,21 @@ import {
   MapPin,
   Briefcase,
   DollarSign,
-  MessageSquare,
   BookOpen,
   ExternalLink,
 } from "lucide-react";
 import { mockRequests } from "@/lib/mock-data";
-import { RequestStatusBadge, TripTypeBadge } from "@/components/status-badge";
-import { formatDate, formatDateTime, formatCurrencyFull, timeAgo } from "@/lib/utils";
-import type { RequestOption } from "@/lib/types";
+import { RequestStatusBadge, TripTypesBadge } from "@/components/status-badge";
+import { formatDate, formatCurrencyFull, timeAgo } from "@/lib/utils";
+import type { RequestOption, TripType } from "@/lib/types";
+
+const SEGMENT_LABELS: Record<string, { label: string; emoji: string }> = {
+  flight: { label: "Flight Options", emoji: "✈" },
+  hotel: { label: "Hotel Options", emoji: "🏨" },
+  train: { label: "Train Options", emoji: "🚄" },
+  visa: { label: "Visa Services", emoji: "📋" },
+  other: { label: "Other", emoji: "•" },
+};
 
 export default function RequestDetailPage({
   params,
@@ -48,12 +55,24 @@ export default function RequestDetailPage({
   const options = request.options || [];
   const messages = request.messages || [];
 
+  // Group options by segment_type, preserving the order they appear in trip_types
+  const segmentOrder = request.trip_types;
+  const grouped = options.reduce<Record<string, RequestOption[]>>((acc, opt) => {
+    const seg = opt.segment_type;
+    if (!acc[seg]) acc[seg] = [];
+    acc[seg].push(opt);
+    return acc;
+  }, {});
+  const orderedSegments = [
+    ...segmentOrder.filter((s) => grouped[s]),
+    ...Object.keys(grouped).filter((s) => !segmentOrder.includes(s as TripType)),
+  ];
+
   return (
     <div className="flex h-full">
       {/* Main panel */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-8 max-w-3xl">
-          {/* Back + header */}
           <Link
             href="/requests"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
@@ -105,8 +124,8 @@ export default function RequestDetailPage({
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Type</p>
-                <TripTypeBadge type={request.trip_type} />
+                <p className="text-xs text-muted-foreground mb-1">Services</p>
+                <TripTypesBadge types={request.trip_types} />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Budget</p>
@@ -115,10 +134,20 @@ export default function RequestDetailPage({
                 </p>
               </div>
             </div>
-            {request.special_instructions && (
-              <div className="mt-4 pt-4 border-t border-border">
-                <p className="text-xs text-muted-foreground mb-1">Special Instructions</p>
-                <p className="text-sm text-foreground">{request.special_instructions}</p>
+            {(request.hotel_nights || request.hotel_preference || request.special_instructions) && (
+              <div className="mt-4 pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {request.hotel_nights && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Hotel Nights</p>
+                    <p className="text-sm text-foreground">{request.hotel_nights} nights{request.hotel_preference ? ` · ${request.hotel_preference}` : ""}</p>
+                  </div>
+                )}
+                {request.special_instructions && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Special Instructions</p>
+                    <p className="text-sm text-foreground">{request.special_instructions}</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -150,9 +179,9 @@ export default function RequestDetailPage({
             ))}
           </div>
 
-          {/* Options tab */}
+          {/* Options tab — grouped by segment */}
           {activeTab === "options" && (
-            <div className="space-y-3">
+            <div className="space-y-6">
               {options.length === 0 ? (
                 <div className="bg-card border border-dashed border-border rounded-xl p-8 text-center">
                   <p className="text-sm text-muted-foreground mb-2">No options added yet</p>
@@ -161,16 +190,33 @@ export default function RequestDetailPage({
                   </button>
                 </div>
               ) : (
-                options.map((opt) => (
-                  <OptionCard
-                    key={opt.id}
-                    option={opt}
-                    expanded={expandedOption === opt.id}
-                    onToggle={() =>
-                      setExpandedOption(expandedOption === opt.id ? null : opt.id)
-                    }
-                  />
-                ))
+                orderedSegments.map((seg) => {
+                  const segOpts = grouped[seg] || [];
+                  const segInfo = SEGMENT_LABELS[seg] || { label: seg, emoji: "•" };
+                  return (
+                    <div key={seg}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-base">{segInfo.emoji}</span>
+                        <h3 className="text-sm font-semibold text-foreground">{segInfo.label}</h3>
+                        <span className="text-xs text-muted-foreground">
+                          {segOpts.length} option{segOpts.length > 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <div className="space-y-3">
+                        {segOpts.map((opt) => (
+                          <OptionCard
+                            key={opt.id}
+                            option={opt}
+                            expanded={expandedOption === opt.id}
+                            onToggle={() =>
+                              setExpandedOption(expandedOption === opt.id ? null : opt.id)
+                            }
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
               )}
 
               <button className="w-full py-3 border border-dashed border-border rounded-xl text-sm text-muted-foreground hover:text-foreground hover:border-border/80 transition-colors">
@@ -219,7 +265,6 @@ export default function RequestDetailPage({
                 )}
               </div>
 
-              {/* Message input */}
               <div className="flex gap-2 items-end">
                 <textarea
                   value={message}
