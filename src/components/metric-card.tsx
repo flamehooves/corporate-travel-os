@@ -36,7 +36,7 @@ export function MetricCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-muted-foreground font-medium truncate">{title}</p>
+          <p className="text-sm text-muted-foreground font-medium leading-snug">{title}</p>
           <p className={cn(
             "text-2xl font-semibold mt-1 tracking-tight",
             alert && "text-red-600 dark:text-red-400"
@@ -57,7 +57,7 @@ export function MetricCard({
         </div>
         {Icon && (
           <div className={cn(
-            "flex-shrink-0 p-2.5 rounded-lg",
+            "hidden sm:flex flex-shrink-0 p-2.5 rounded-lg",
             alert ? "bg-red-50 dark:bg-red-950/30" : "bg-primary/8 dark:bg-primary/10"
           )}>
             <Icon className={cn(

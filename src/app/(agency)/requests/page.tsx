@@ -87,7 +87,7 @@ export default function RequestsPage() {
           <thead>
             <tr className="border-b border-border bg-secondary/30">
               <th className="text-left px-5 py-3.5 text-xs font-medium text-muted-foreground">Request</th>
-              <th className="text-left px-5 py-3.5 text-xs font-medium text-muted-foreground">Client · Traveler</th>
+              <th className="text-left px-5 py-3.5 text-xs font-medium text-muted-foreground hidden sm:table-cell">Client · Traveler</th>
               <th className="text-left px-5 py-3.5 text-xs font-medium text-muted-foreground hidden lg:table-cell">Route · Date</th>
               <th className="text-left px-5 py-3.5 text-xs font-medium text-muted-foreground hidden md:table-cell">Type</th>
               <th className="text-left px-5 py-3.5 text-xs font-medium text-muted-foreground hidden xl:table-cell">Budget</th>
@@ -105,9 +105,12 @@ export default function RequestsPage() {
                       {req.request_number}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">{req.purpose}</p>
+                    <p className="text-xs text-muted-foreground sm:hidden mt-0.5">
+                      {req.client?.company_name} · {req.traveler_name}
+                    </p>
                   </Link>
                 </td>
-                <td className="px-5 py-4">
+                <td className="px-5 py-4 hidden sm:table-cell">
                   <p className="text-sm font-medium text-foreground">{req.client?.company_name}</p>
                   <p className="text-xs text-muted-foreground">{req.traveler_name}</p>
                 </td>
