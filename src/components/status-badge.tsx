@@ -1,6 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import {
+  AirplaneTakeoff,
+  Train,
+  Buildings,
+  IdentificationCard,
+  Dot,
+} from "@phosphor-icons/react";
 import type { RequestStatus, InvoiceStatus, TripType } from "@/lib/types";
 
 const requestStatusConfig: Record<RequestStatus, { label: string; className: string }> = {
@@ -14,7 +21,7 @@ const requestStatusConfig: Record<RequestStatus, { label: string; className: str
   },
   options_shared: {
     label: "Options Shared",
-    className: "bg-violet-400/15 text-violet-300 border-violet-400/30",
+    className: "bg-blue-400/15 text-blue-300 border-blue-400/30",
   },
   approved: {
     label: "Approved",
@@ -57,12 +64,12 @@ const invoiceStatusConfig: Record<InvoiceStatus, { label: string; className: str
   },
 };
 
-const tripTypeIcons: Record<string, string> = {
-  flight: "✈",
-  train: "🚄",
-  hotel: "🏨",
-  visa: "📋",
-  other: "•",
+const tripTypeIconMap: Record<string, React.ComponentType<{ className?: string; weight?: string }>> = {
+  flight: AirplaneTakeoff,
+  train: Train,
+  hotel: Buildings,
+  visa: IdentificationCard,
+  other: Dot,
 };
 
 interface RequestStatusBadgeProps {
@@ -106,9 +113,10 @@ export function InvoiceStatusBadge({ status, className }: InvoiceStatusBadgeProp
 }
 
 export function TripTypeBadge({ type }: { type: string }) {
+  const Icon = tripTypeIconMap[type] ?? Dot;
   return (
-    <span className="inline-flex items-center gap-1 text-xs text-white/45">
-      <span>{tripTypeIcons[type] || "•"}</span>
+    <span className="inline-flex items-center gap-1 text-xs text-white/40">
+      <Icon className="w-3 h-3" weight="fill" />
       <span className="capitalize">{type}</span>
     </span>
   );
@@ -118,12 +126,15 @@ export function TripTypesBadge({ types, className }: { types: TripType[]; classN
   if (!types || types.length === 0) return null;
   return (
     <span className={cn("inline-flex items-center gap-2 flex-wrap", className)}>
-      {types.map((type) => (
-        <span key={type} className="inline-flex items-center gap-1 text-xs text-white/45">
-          <span>{tripTypeIcons[type] || "•"}</span>
-          <span className="capitalize">{type}</span>
-        </span>
-      ))}
+      {types.map((type) => {
+        const Icon = tripTypeIconMap[type] ?? Dot;
+        return (
+          <span key={type} className="inline-flex items-center gap-1 text-xs text-white/40">
+            <Icon className="w-3 h-3" weight="fill" />
+            <span className="capitalize">{type}</span>
+          </span>
+        );
+      })}
     </span>
   );
 }
