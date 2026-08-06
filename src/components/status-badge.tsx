@@ -7,6 +7,7 @@ import {
   Buildings,
   IdentificationCard,
   Dot,
+  type Icon,
 } from "@phosphor-icons/react";
 import type { RequestStatus, InvoiceStatus, TripType } from "@/lib/types";
 
@@ -64,7 +65,7 @@ const invoiceStatusConfig: Record<InvoiceStatus, { label: string; className: str
   },
 };
 
-const tripTypeIconMap: Record<string, React.ComponentType<{ className?: string; weight?: string }>> = {
+const tripTypeIconMap: Record<string, Icon> = {
   flight: AirplaneTakeoff,
   train: Train,
   hotel: Buildings,
