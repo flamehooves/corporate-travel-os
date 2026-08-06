@@ -5,12 +5,7 @@ export default function AgencyLayout({ children }: { children: React.ReactNode }
     <div className="flex h-screen overflow-hidden">
       <SidebarNav />
       <div className="flex-1 flex flex-col lg:ml-60 min-w-0">
-        <main
-          className="flex-1 overflow-y-auto pb-16 lg:pb-0"
-          style={{
-            background: "linear-gradient(160deg, #f0f9ff 0%, #f8fbff 40%, #fffdf7 100%)",
-          }}
-        >
+        <main className="flex-1 overflow-y-auto pb-16 lg:pb-0">
           {children}
         </main>
         <MobileBottomNav />
